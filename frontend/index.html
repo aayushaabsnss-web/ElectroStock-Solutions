@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElectroStock Solutions</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── VARIABLES ─────────────────────────────────── */
+    :root {
+      --navy:        #1B2B4B;
+      --blue:        #2563EB;
+      --blue-light:  #EFF6FF;
+      --blue-mid:    #BFDBFE;
+      --sidebar-w:   220px;
+      --topbar-h:    56px;
+      --font-main:   'DM Sans', sans-serif;
+      --font-mono:   'DM Mono', monospace;
+      --radius:      10px;
+      --border:      #E2E8F0;
+      --bg:          #F8FAFC;
+      --white:       #FFFFFF;
+      --text-1:      #0F172A;
+      --text-2:      #475569;
+      --text-3:      #94A3B8;
+      --green:       #16A34A;
+      --green-bg:    #F0FDF4;
+      --amber:       #D97706;
+      --amber-bg:    #FFFBEB;
+      --red:         #DC2626;
+      --red-bg:      #FEF2F2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-main); background: var(--bg); color: var(--text-1); font-size: 14px; }
+
+    /* ── SIDEBAR ───────────────────────────────────── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: var(--sidebar-w); height: 100vh;
+      background: var(--navy);
+      display: flex; flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .brand-logo {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .brand-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--blue); display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .brand-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-name { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: -.01em; line-height: 1.2; }
+    .brand-sub  { font-size: 10px; color: rgba(255,255,255,.4); font-family: var(--font-mono); }
+
+    /* role badge */
+    .role-badge {
+      margin: 12px 14px 4px;
+      padding: 6px 10px; border-radius: 8px;
+      font-size: 11px; font-weight: 500;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .role-owner { background: rgba(37,99,235,.2); color: #93C5FD; }
+    .role-emp   { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); }
+    .role-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* nav */
+    .nav-section { padding: 6px 10px; flex: 1; overflow-y: auto; }
+    .nav-label {
+      font-size: 10px; font-weight: 600; color: rgba(255,255,255,.25);
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: 8px 8px 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 8px;
+      font-size: 13px; color: rgba(255,255,255,.55);
+      text-decoration: none; cursor: pointer;
+      transition: all .12s; border: 1px solid transparent;
+      margin-bottom: 1px; user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+    .nav-item.active { background: rgba(37,99,235,.25); color: #fff; border-color: rgba(37,99,235,.4); }
+    .nav-icon { width: 16px; height: 16px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      background: var(--red); color: #fff;
+      padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center;
+    }
+    .nav-lock {
+      margin-left: auto; font-size: 10px;
+      color: rgba(255,255,255,.25); font-family: var(--font-mono);
+    }
+
+    /* sidebar footer */
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .user-row {
+      display: flex; align-items: center; gap: 9px;
+    }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue); display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 12px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 10px; color: rgba(255,255,255,.35); font-family: var(--font-mono); }
+    .logout-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1);
+      background: transparent; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,.08); }
+    .logout-btn svg { width: 14px; height: 14px; stroke: rgba(255,255,255,.4); fill: none; stroke-width: 1.8; }
+
+    /* ── TOPBAR ────────────────────────────────────── */
+    .topbar {
+      position: fixed; top: 0; left: var(--sidebar-w); right: 0;
+      height: var(--topbar-h);
+      background: var(--white); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 24px; gap: 16px;
+      z-index: 99;
+    }
+    .page-title { font-size: 15px; font-weight: 600; color: var(--text-1); flex: 1; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* search bar in topbar */
+    .topbar-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0 12px; height: 34px;
+    }
+    .topbar-search svg { width: 14px; height: 14px; stroke: var(--text-3); fill: none; stroke-width: 2; }
+    .topbar-search input {
+      border: none; background: transparent; font-size: 13px;
+      color: var(--text-1); outline: none; width: 180px;
+      font-family: var(--font-main);
+    }
+    .topbar-search input::placeholder { color: var(--text-3); }
+
+    /* notification bell */
+    .notif-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative;
+    }
+    .notif-btn:hover { background: var(--bg); }
+    .notif-btn svg { width: 16px; height: 16px; stroke: var(--text-2); fill: none; stroke-width: 1.8; }
+    .notif-dot {
+      position: absolute; top: 6px; right: 6px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--red); border: 1.5px solid #fff;
+    }
+
+    /* ── MAIN CONTENT ──────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+    .content { padding: 24px; }
+
+    /* ── STAT CARDS ────────────────────────────────── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .stat-label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+    .stat-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .stat-icon svg { width: 15px; height: 15px; stroke-width: 2; fill: none; }
+    .stat-val { font-size: 26px; font-weight: 600; color: var(--text-1); line-height: 1; margin-bottom: 4px; }
+    .stat-sub { font-size: 11px; color: var(--text-3); }
+
+    /* ── CARD ──────────────────────────────────────── */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .card-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text-1); flex: 1; }
+    .card-body { padding: 18px; }
+
+    /* ── TABLE ─────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .05em;
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      text-align: left; white-space: nowrap;
+    }
+    tbody td {
+      padding: 11px 14px; border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--text-1); vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--bg); }
+    .product-name { font-weight: 500; }
+    .product-cat  { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+    /* ── BADGES ────────────────────────────────────── */
+    .badge-in     { background: var(--green-bg); color: var(--green); }
+    .badge-low    { background: var(--amber-bg); color: var(--amber); }
+    .badge-out    { background: var(--red-bg);   color: var(--red);   }
+    .badge-cat    { background: var(--blue-light); color: var(--blue); }
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 500;
+      padding: 3px 9px; border-radius: 20px;
+    }
+
+    /* stock bar */
+    .stock-wrap { display: flex; align-items: center; gap: 8px; }
+    .stock-bar-bg { width: 50px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .stock-bar-fill { height: 100%; border-radius: 3px; }
+    .stock-num { font-size: 12px; font-weight: 500; font-family: var(--font-mono); }
+
+    /* ── BUTTONS ───────────────────────────────────── */
+    .btn-primary {
+      background: var(--blue); color: #fff; border: none;
+      padding: 7px 14px; border-radius: 8px; font-size: 13px;
+      font-weight: 500; cursor: pointer; display: inline-flex;
+      align-items: center; gap: 6px; font-family: var(--font-main);
+    }
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-outline {
+      background: transparent; color: var(--text-2);
+      border: 1px solid var(--border);
+      padding: 7px 14px; border-radius: 8px; font-size: 13px;
+      font-weight: 500; cursor: pointer; display: inline-flex;
+      align-items: center; gap: 6px; font-family: var(--font-main);
+    }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-icon {
+      width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .btn-icon:hover { background: var(--bg); }
+    .btn-icon svg { width: 14px; height: 14px; stroke: var(--text-2); fill: none; stroke-width: 1.8; }
+
+    /* ── FORM ELEMENTS ─────────────────────────────── */
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 500; color: var(--text-2); display: block; margin-bottom: 5px; }
+    .form-control {
+      width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; color: var(--text-1);
+      font-family: var(--font-main); outline: none; background: var(--white);
+    }
+    .form-control:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* ── ALERT BANNER ──────────────────────────────── */
+    .alert-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: var(--radius);
+      margin-bottom: 16px; font-size: 13px;
+    }
+    .alert-warn { background: var(--amber-bg); border: 1px solid #FDE68A; color: #92400E; }
+    .alert-banner svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── SCREEN SECTIONS ───────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── RESPONSIVE ────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform .2s; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .topbar { left: 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <a class="brand-logo" href="#">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">ElectroStock</span>
+        <span class="brand-sub">ESS v1.0</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Role badge — swap class with JS based on session role -->
+  <div class="role-badge role-owner" id="role-badge">
+    <span class="role-dot"></span>
+    <span id="role-label">Store Owner</span>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+
+    <a class="nav-item active" id="nav-dashboard" onclick="showScreen('dashboard', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+
+    <a class="nav-item" id="nav-products" onclick="showScreen('products', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      Products
+      <!-- Store Owner only — hide for Employee -->
+      <span class="nav-lock" id="products-lock" style="display:none">Owner</span>
+    </a>
+
+    <a class="nav-item" id="nav-stock" onclick="showScreen('stock', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M2 12l5-5 4 4 5-5 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Stock Update
+    </a>
+
+    <a class="nav-item" id="nav-alerts" onclick="showScreen('alerts', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      Alerts
+      <span class="nav-badge" id="alert-count">3</span>
+    </a>
+
+    <a class="nav-item" id="nav-search" onclick="showScreen('search', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/></svg>
+      Search
+    </a>
+
+    <div class="nav-label" style="margin-top:8px">Reports</div>
+
+    <!-- Reports — Store Owner only -->
+    <a class="nav-item" id="nav-reports" onclick="showScreen('reports', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      Reports
+      <span class="nav-lock" id="reports-lock">Owner</span>
+    </a>
+
+  </nav>
+
+  <!-- User / logout -->
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar" id="user-avatar">AK</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Aayusha Katuwal</div>
+        <div class="user-role" id="user-role-text">store_owner</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Logout">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ═══════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════════ -->
+<header class="topbar">
+  <h1 class="page-title" id="page-title">Dashboard</h1>
+  <div class="topbar-right">
+    <!-- Quick search -->
+    <div class="topbar-search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Quick search products..." id="quick-search" oninput="quickSearch(this.value)"/>
+    </div>
+    <!-- Notifications -->
+    <div class="notif-btn" onclick="showScreen('alerts', document.getElementById('nav-alerts'))">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <div class="notif-dot" id="notif-dot"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════ -->
+<main class="main">
+  <div class="content">
+
+    <!-- ── SCREEN: DASHBOARD ── -->
+    <section class="screen active" id="screen-dashboard">
+      <div class="alert-banner alert-warn" id="low-stock-banner">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+        <span><strong>3 products</strong> are below minimum stock level — <a href="#" onclick="showScreen('alerts', document.getElementById('nav-alerts'))" style="color:inherit;font-weight:600">View Alerts</a></span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Total Products</span>
+            <div class="stat-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" style="stroke:#2563EB"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+          </div>
+          <div class="stat-val">8</div>
+          <div class="stat-sub">Active products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">In Stock</span>
+            <div class="stat-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" style="stroke:#16A34A"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          </div>
+          <div class="stat-val" style="color:var(--green)">5</div>
+          <div class="stat-sub">Healthy stock levels</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Low Stock</span>
+            <div class="stat-icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" style="stroke:#D97706"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg></div>
+          </div>
+          <div class="stat-val" style="color:var(--amber)">3</div>
+          <div class="stat-sub">Below threshold</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Out of Stock</span>
+            <div class="stat-icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" style="stroke:#DC2626"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          </div>
+          <div class="stat-val" style="color:var(--red)">1</div>
+          <div class="stat-sub">Needs restocking</div>
+        </div>
+      </div>
+
+      <!-- Recent products table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Product Overview</span>
+          <button class="btn-primary" onclick="showScreen('products', document.getElementById('nav-products'))">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Product
+          </button>
+        </div>
+        <div class="tbl-wrap">
+          <table id="dashboard-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREEN: PRODUCTS ── -->
+    <section class="screen" id="screen-products">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Product Management</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn-outline">Export</button>
+            <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Product
+            </button>
+          </div>
+        </div>
+        <!-- Filter row -->
+        <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap">
+          <input class="form-control" style="width:200px;height:34px;padding:6px 12px" placeholder="Search products..." id="product-search-input" oninput="filterTable()"/>
+          <select class="form-control" style="width:140px;height:34px;padding:4px 10px" id="cat-filter" onchange="filterTable()">
+            <option value="">All categories</option>
+            <option>iPhone</option><option>Mac</option><option>iPad</option><option>Watch</option><option>Accessory</option>
+          </select>
+          <select class="form-control" style="width:150px;height:34px;padding:4px 10px" id="status-filter" onchange="filterTable()">
+            <option value="">All statuses</option>
+            <option value="in">In Stock</option>
+            <option value="low">Low Stock</option>
+            <option value="out">Out of Stock</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th><th>Category</th><th>Price</th><th>Quantity</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREEN: STOCK UPDATE ── -->
+    <section class="screen" id="screen-stock">
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Record Transaction</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Product</label>
+              <select class="form-control" id="stock-product">
+                <option value="">Select product...</option>
+                <option>iPhone 15 Pro Max</option><option>MacBook Pro M3</option>
+                <option>iPad Air 5th Gen</option><option>Apple Watch Series 9</option>
+                <option>AirPods Pro 2nd Gen</option><option>Mac mini M2</option>
+              </select>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Type</label>
+                <select class="form-control" id="stock-type">
+                  <option value="IN">IN — Delivery</option>
+                  <option value="OUT">OUT — Sale</option>
+                  <option value="ADJ">ADJUSTMENT</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="stock-qty" min="1" value="1"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" class="form-control" id="stock-notes" placeholder="e.g. Delivery batch #88"/>
+            </div>
+            <button class="btn-primary" style="width:100%" onclick="logTransaction()">Log Transaction</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Transaction History</span></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Product</th><th>Type</th><th>Qty</th><th>Date</th><th>By</th><th>Notes</th></tr></thead>
+              <tbody id="stock-tbody">
+                <tr><td class="product-name">AirPods Pro 2nd Gen</td><td><span class="badge badge-out">OUT</span></td><td style="font-family:var(--font-mono)">−2</td><td>21 Oct 2025</td><td>Employee</td><td>Store sale</td></tr>
+                <tr><td class="product-name">iPhone 15 Pro Max</td><td><span class="badge badge-in">IN</span></td><td style="font-family:var(--font-mono)">+10</td><td>20 Oct 2025</td><td>Store Owner</td><td>Batch #87</td></tr>
+                <tr><td class="product-name">iPad Air 5th Gen</td><td><span class="badge badge-out">OUT</span></td><td style="font-family:var(--font-mono)">−5</td><td>19 Oct 2025</td><td>Employee</td><td>Store sales</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREEN: ALERTS ── -->
+    <section class="screen" id="screen-alerts">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Low Stock Alerts</span>
+          <span class="badge badge-out">3 Active</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Product</th><th>Category</th><th>Current Qty</th><th>Min Level</th><th>Shortfall</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="product-name">iPhone 15 Pro Max</div></td>
+                <td><span class="badge badge-cat">iPhone</span></td>
+                <td style="font-family:var(--font-mono);color:var(--amber);font-weight:500">8</td>
+                <td style="font-family:var(--font-mono)">10</td>
+                <td><span class="badge badge-out">−2</span></td>
+                <td>20 Oct 2025</td>
+                <td><button class="btn-outline" style="font-size:12px;padding:4px 10px" onclick="resolveAlert(this)">Resolve</button></td>
+              </tr>
+              <tr>
+                <td><div class="product-name">iPad Air 5th Gen</div></td>
+                <td><span class="badge badge-cat">iPad</span></td>
+                <td style="font-family:var(--font-mono);color:var(--amber);font-weight:500">3</td>
+                <td style="font-family:var(--font-mono)">8</td>
+                <td><span class="badge badge-out">−5</span></td>
+                <td>19 Oct 2025</td>
+                <td><button class="btn-outline" style="font-size:12px;padding:4px 10px" onclick="resolveAlert(this)">Resolve</button></td>
+              </tr>
+              <tr>
+                <td><div class="product-name">AirPods Pro 2nd Gen</div></td>
+                <td><span class="badge badge-cat">Accessory</span></td>
+                <td style="font-family:var(--font-mono);color:var(--red);font-weight:500">0</td>
+                <td style="font-family:var(--font-mono)">5</td>
+                <td><span class="badge badge-out">−5</span></td>
+                <td>21 Oct 2025</td>
+                <td><button class="btn-outline" style="font-size:12px;padding:4px 10px" onclick="resolveAlert(this)">Resolve</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREEN: SEARCH ── -->
+    <section class="screen" id="screen-search">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-body" style="padding:14px 18px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input class="form-control" style="flex:1;min-width:180px" placeholder="Search by name..." id="search-name"/>
+            <select class="form-control" style="width:150px" id="search-cat">
+              <option value="">All categories</option>
+              <option>iPhone</option><option>Mac</option><option>iPad</option><option>Watch</option><option>Accessory</option>
+            </select>
+            <select class="form-control" style="width:160px" id="search-status">
+              <option value="">All statuses</option>
+              <option value="in">In Stock</option><option value="low">Low Stock</option><option value="out">Out of Stock</option>
+            </select>
+            <button class="btn-primary" onclick="runSearch()">Search</button>
+            <button class="btn-outline" onclick="clearSearch()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Search Results</span>
+          <span class="stat-sub" id="search-count">8 products found</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Product Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead>
+            <tbody id="search-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREEN: REPORTS ── -->
+    <section class="screen" id="screen-reports">
+      <!-- Locked for employees -->
+      <div id="reports-locked" style="display:none;text-align:center;padding:60px 20px">
+        <div style="font-size:32px;margin-bottom:12px">🔒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:6px">Store Owner access only</div>
+        <div style="font-size:13px;color:var(--text-2)">Report generation is restricted to the Store Owner role.</div>
+      </div>
+      <div id="reports-content">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px" id="report-cards">
+          <div class="card" style="padding:16px;cursor:pointer;border-color:var(--blue)" onclick="selectReport('low',this)">
+            <div style="width:36px;height:36px;border-radius:9px;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Low Stock Report</div>
+            <div style="font-size:12px;color:var(--text-2)">Products at or below minimum stock threshold</div>
+          </div>
+          <div class="card" style="padding:16px;cursor:pointer" onclick="selectReport('value',this)">
+            <div style="width:36px;height:36px;border-radius:9px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Product Value Report</div>
+            <div style="font-size:12px;color:var(--text-2)">Total inventory value — price × quantity</div>
+          </div>
+          <div class="card" style="padding:16px;cursor:pointer" onclick="selectReport('movement',this)">
+            <div style="width:36px;height:36px;border-radius:9px;background:var(--green-bg);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><path d="M2 12l5-5 4 4 5-5 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Stock Movement</div>
+            <div style="font-size:12px;color:var(--text-2)">All transactions within a date range</div>
+          </div>
+        </div>
+        <!-- Date range (shown for movement only) -->
+        <div class="card" id="date-range-card" style="margin-bottom:16px;display:none">
+          <div class="card-body" style="padding:14px 18px">
+            <div class="form-grid-2" style="max-width:400px">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Date from</label>
+                <input type="date" class="form-control" id="r-date-from" value="2025-10-01"/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Date to</label>
+                <input type="date" class="form-control" id="r-date-to" value="2025-10-31"/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <button class="btn-primary" onclick="generateReport()">Generate Report</button>
+          <button class="btn-outline" onclick="exportCSV()">↓ Export CSV</button>
+        </div>
+        <div class="card" id="report-result" style="display:none">
+          <div class="card-header">
+            <span class="card-title" id="report-result-title">Report Results</span>
+            <span class="stat-sub" id="report-meta"></span>
+          </div>
+          <div class="tbl-wrap"><table><thead id="report-thead"></thead><tbody id="report-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     ADD PRODUCT MODAL
+════════════════════════════════════════════ -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:12px;border:1px solid var(--border)">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);padding:16px 20px">
+        <h5 class="modal-title" style="font-size:15px;font-weight:600">Add New Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div class="form-group">
+          <label class="form-label">Product Name</label>
+          <input type="text" class="form-control" id="new-name" placeholder="e.g. iPhone 16 Pro"/>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-control" id="new-cat">
+              <option>iPhone</option><option>Mac</option><option>iPad</option><option>Watch</option><option>Accessory</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price ($)</label>
+            <input type="number" class="form-control" id="new-price" placeholder="0.00"/>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="new-qty" placeholder="0"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Min Stock Level</label>
+            <input type="number" class="form-control" id="new-min" placeholder="5"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--border);padding:14px 20px">
+        <button class="btn-outline" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-primary" onclick="addProduct()" data-bs-dismiss="modal">Add Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── SAMPLE DATA ──────────────────────────────────
+const products = [
+  {id:1, name:"iPhone 15 Pro Max", cat:"iPhone", price:1199, qty:8,  min:10},
+  {id:2, name:"MacBook Pro M3",    cat:"Mac",    price:1999, qty:15, min:5},
+  {id:3, name:"iPad Air 5th Gen",  cat:"iPad",   price:749,  qty:3,  min:8},
+  {id:4, name:"Apple Watch S9",    cat:"Watch",  price:399,  qty:22, min:10},
+  {id:5, name:"AirPods Pro 2nd",   cat:"Accessory",price:249,qty:0,  min:5},
+  {id:6, name:"Mac mini M2",       cat:"Mac",    price:599,  qty:11, min:5},
+  {id:7, name:"iPhone 14",         cat:"iPhone", price:699,  qty:6,  min:8},
+  {id:8, name:"iPad mini 6th Gen", cat:"iPad",   price:499,  qty:18, min:5},
+];
+
+let currentReport = 'low';
+
+// ── HELPERS ──────────────────────────────────────
+function getStatus(p){ return p.qty===0?'out':p.qty<=p.min?'low':'in'; }
+function statusBadge(p){
+  const s=getStatus(p);
+  const map={in:['badge-in','In Stock'],low:['badge-low','Low Stock'],out:['badge-out','Out of Stock']};
+  return `<span class="badge ${map[s][0]}">${map[s][1]}</span>`;
+}
+function stockBar(p){
+  const s=getStatus(p);
+  const col=s==='in'?'var(--green)':s==='low'?'var(--amber)':'var(--red)';
+  const pct=Math.min(100,Math.round((p.qty/(p.min*2))*100));
+  return `<div class="stock-wrap"><div class="stock-bar-bg"><div class="stock-bar-fill" style="width:${pct}%;background:${col}"></div></div><span class="stock-num">${p.qty}</span></div>`;
+}
+function renderTable(tbody, list){
+  tbody.innerHTML = list.map(p=>`
+    <tr>
+      <td><div class="product-name">${p.name}</div></td>
+      <td><span class="badge badge-cat">${p.cat}</span></td>
+      <td style="font-family:var(--font-mono);font-weight:500">$${p.price.toLocaleString()}</td>
+      <td>${stockBar(p)}</td>
+      <td>${statusBadge(p)}</td>
+    </tr>`).join('');
+}
+
+// ── SCREEN NAV ───────────────────────────────────
+function showScreen(id, el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',products:'Products',stock:'Stock Update',alerts:'Alerts',search:'Search Products',reports:'Reports'};
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(id==='search') renderTable(document.getElementById('search-tbody'), products);
+  if(id==='products') renderProductsTable();
+}
+
+// ── PRODUCT TABLE (with edit/delete) ─────────────
+function renderProductsTable(){
+  const tbody=document.getElementById('products-tbody');
+  const q=document.getElementById('product-search-input')?.value.toLowerCase()||'';
+  const cat=document.getElementById('cat-filter')?.value||'';
+  const st=document.getElementById('status-filter')?.value||'';
+  const list=products.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    if(cat && p.cat!==cat) return false;
+    if(st && getStatus(p)!==st) return false;
+    return true;
+  });
+  tbody.innerHTML=list.map(p=>`
+    <tr>
+      <td><div class="product-name">${p.name}</div></td>
+      <td><span class="badge badge-cat">${p.cat}</span></td>
+      <td style="font-family:var(--font-mono);font-weight:500">$${p.price.toLocaleString()}</td>
+      <td>${stockBar(p)}</td>
+      <td>${statusBadge(p)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn-icon" title="Edit"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn-icon" title="Delete" onclick="this.closest('tr').style.opacity='.3'"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function filterTable(){ renderProductsTable(); }
+
+// ── DASHBOARD TABLE ───────────────────────────────
+renderTable(document.getElementById('dashboard-tbody'), products);
+
+// ── SEARCH ───────────────────────────────────────
+function runSearch(){
+  const q=document.getElementById('search-name').value.toLowerCase();
+  const cat=document.getElementById('search-cat').value;
+  const st=document.getElementById('search-status').value;
+  const list=products.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    if(cat && p.cat!==cat) return false;
+    if(st && getStatus(p)!==st) return false;
+    return true;
+  });
+  renderTable(document.getElementById('search-tbody'), list);
+  document.getElementById('search-count').textContent=list.length+' products found';
+}
+function clearSearch(){
+  document.getElementById('search-name').value='';
+  document.getElementById('search-cat').value='';
+  document.getElementById('search-status').value='';
+  renderTable(document.getElementById('search-tbody'), products);
+  document.getElementById('search-count').textContent=products.length+' products found';
+}
+function quickSearch(q){
+  if(document.getElementById('screen-search').classList.contains('active')){
+    document.getElementById('search-name').value=q;
+    runSearch();
+  }
+}
+
+// ── STOCK ─────────────────────────────────────────
+function logTransaction(){
+  const prod=document.getElementById('stock-product').value;
+  const type=document.getElementById('stock-type').value;
+  const qty=parseInt(document.getElementById('stock-qty').value)||1;
+  const notes=document.getElementById('stock-notes').value||'—';
+  if(!prod) return;
+  const tbody=document.getElementById('stock-tbody');
+  const row=document.createElement('tr');
+  const bc=type==='IN'?'badge-in':type==='OUT'?'badge-out':'badge-low';
+  const sign=type==='IN'?'+':type==='OUT'?'−':'±';
+  row.innerHTML=`<td class="product-name">${prod}</td><td><span class="badge ${bc}">${type}</span></td><td style="font-family:var(--font-mono)">${sign}${qty}</td><td>${new Date().toLocaleDateString('en-GB')}</td><td>Store Owner</td><td>${notes}</td>`;
+  tbody.insertBefore(row,tbody.firstChild);
+  document.getElementById('stock-notes').value='';
+  document.getElementById('stock-qty').value=1;
+}
+
+// ── ALERTS ───────────────────────────────────────
+function resolveAlert(btn){
+  const row=btn.closest('tr');
+  row.style.opacity='.4';
+  btn.textContent='Resolved ✓';
+  btn.disabled=true;
+}
+
+// ── ADD PRODUCT ───────────────────────────────────
+function addProduct(){
+  const name=document.getElementById('new-name').value;
+  if(!name) return;
+  products.push({
+    id:products.length+1,
+    name, cat:document.getElementById('new-cat').value,
+    price:parseFloat(document.getElementById('new-price').value)||0,
+    qty:parseInt(document.getElementById('new-qty').value)||0,
+    min:parseInt(document.getElementById('new-min').value)||5,
+  });
+  renderProductsTable();
+  renderTable(document.getElementById('dashboard-tbody'), products);
+}
+
+// ── REPORTS ──────────────────────────────────────
+function selectReport(type, el){
+  currentReport=type;
+  document.querySelectorAll('#report-cards .card').forEach(c=>c.style.borderColor='var(--border)');
+  el.style.borderColor='var(--blue)';
+  document.getElementById('date-range-card').style.display=type==='movement'?'block':'none';
+  document.getElementById('report-result').style.display='none';
+}
+function generateReport(){
+  const result=document.getElementById('report-result');
+  result.style.display='block';
+  const thead=document.getElementById('report-thead');
+  const tbody=document.getElementById('report-tbody');
+  const title=document.getElementById('report-result-title');
+  const meta=document.getElementById('report-meta');
+  if(currentReport==='low'){
+    title.textContent='Low Stock Report';
+    const low=products.filter(p=>p.qty<=p.min);
+    meta.textContent=`${low.length} products flagged · ${new Date().toLocaleDateString('en-GB')}`;
+    thead.innerHTML='<tr><th>Product</th><th>Category</th><th>Current Qty</th><th>Min Level</th><th>Shortfall</th></tr>';
+    tbody.innerHTML=low.map(p=>`<tr><td class="product-name">${p.name}</td><td><span class="badge badge-cat">${p.cat}</span></td><td style="font-family:var(--font-mono);color:${p.qty===0?'var(--red)':'var(--amber)'};font-weight:500">${p.qty}</td><td style="font-family:var(--font-mono)">${p.min}</td><td><span class="badge badge-out">−${p.min-p.qty}</span></td></tr>`).join('');
+  } else if(currentReport==='value'){
+    title.textContent='Product Value Report';
+    const total=products.reduce((s,p)=>s+p.price*p.qty,0);
+    meta.textContent=`Total value: $${total.toLocaleString()} · ${new Date().toLocaleDateString('en-GB')}`;
+    thead.innerHTML='<tr><th>Product</th><th>Price</th><th>Quantity</th><th>Total Value</th></tr>';
+    tbody.innerHTML=[...products].sort((a,b)=>b.price*b.qty-a.price*a.qty).map(p=>`<tr><td class="product-name">${p.name}</td><td style="font-family:var(--font-mono)">$${p.price.toLocaleString()}</td><td style="font-family:var(--font-mono)">${p.qty}</td><td style="font-family:var(--font-mono);font-weight:600">$${(p.price*p.qty).toLocaleString()}</td></tr>`).join('');
+  } else {
+    const from=document.getElementById('r-date-from').value;
+    const to=document.getElementById('r-date-to').value;
+    title.textContent='Stock Movement Report';
+    meta.textContent=`${from} to ${to}`;
+    thead.innerHTML='<tr><th>Product</th><th>Type</th><th>Qty Change</th><th>Date</th><th>By</th></tr>';
+    tbody.innerHTML=`<tr><td class="product-name">iPhone 15 Pro Max</td><td><span class="badge badge-in">IN</span></td><td style="font-family:var(--font-mono)">+10</td><td>20 Oct 2025</td><td>Store Owner</td></tr><tr><td class="product-name">iPad Air 5th Gen</td><td><span class="badge badge-out">OUT</span></td><td style="font-family:var(--font-mono)">−5</td><td>19 Oct 2025</td><td>Employee</td></tr>`;
+  }
+}
+function exportCSV(){
+  const btn=event.target; const orig=btn.textContent;
+  btn.textContent='✓ Exported!'; btn.disabled=true;
+  setTimeout(()=>{btn.textContent=orig;btn.disabled=false;},2000);
+}
+
+// init search screen
+renderTable(document.getElementById('search-tbody'), products);
+</script>
+</body>
+</html>
