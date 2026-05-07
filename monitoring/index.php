@@ -33,7 +33,7 @@ if($_SERVER["REQUEST_METHOD"]==="POST" && isset($_POST["add_threshold"])){
 // Fetch active and resolved alerts via Alert class
 $active   = $alertObj->getActive();
 $resolved = $alertObj->getResolved(10);
-$an       = mysqli_num_rows($active);
+$an = count($active);
 
 // Product list for threshold configuration form
 $prods = mysqli_query($conn,"SELECT id,name FROM products WHERE is_active=1 ORDER BY name");
