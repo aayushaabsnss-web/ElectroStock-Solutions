@@ -47,7 +47,7 @@ $shortfall = max(0,$al["threshold"] - $al["quantity"]);
         "Category"       => $al["category"],
         "Current qty"    => $al["quantity"]." units",
         "Min threshold"  => $al["threshold"]." units",
-        "Shortfall"      => "-".$shortfall." units",
+        "Shortfall"      => $shortfall." units",
         "Triggered"      => date("d M Y H:i",strtotime($al["alerted_at"])),
         "Resolved"       => $al["resolved_at"]?date("d M Y H:i",strtotime($al["resolved_at"])):"Not yet resolved",
         "Resolved by"    => ($al["rby"] ?? "—"),
@@ -78,7 +78,7 @@ $shortfall = max(0,$al["threshold"] - $al["quantity"]);
         </div>
         <div style="padding:12px 14px;background:var(--rbg);border-radius:8px;border-left:3px solid var(--red)">
           <div style="font-size:11px;color:var(--t2);margin-bottom:4px">Shortfall to reach minimum</div>
-          <div class="mono fw c-red">-<?= $shortfall ?> units needed</div>
+          <div class="mono fw c-red"><?= $shortfall ?> units needed</div>
         </div>
       </div>
     </div>

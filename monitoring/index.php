@@ -6,8 +6,8 @@
  * resolve() calls sp_resolveAlert stored procedure.
  * Access: All users view. Store Owner resolves and sets thresholds.
  */
-$t = "Inventory Alerts"; $a = "monitoring";
-require_once "../includes/header.php";
+require_once "../config/db.php";
+require_once "../auth/session.php";
 require_once "../classes/Alert.php";
 include "../includes/flash.php";
 
@@ -29,6 +29,9 @@ if($_SERVER["REQUEST_METHOD"]==="POST" && isset($_POST["add_threshold"])){
         flash("success","Threshold set."); header("Location: index.php"); exit;
     }
 }
+
+$t = "Inventory Alerts"; $a = "monitoring";
+require_once "../includes/header.php";
 
 // Fetch active and resolved alerts via Alert class
 $active   = $alertObj->getActive();
