@@ -85,7 +85,7 @@ class Order {
 
         // Call stored procedure to create the order header
         $stmt = mysqli_prepare($this->conn, "CALL sp_createOrder(?,?,?,?,@order_id)");
-       mysqli_stmt_bind_param($stmt, 'sssi', $orderNumber, $customer, $notes, $userId);
+       
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
 

@@ -1,33 +1,32 @@
 <?php
 /**
  * stock/index.php — Stock Levels (Presentation Layer)
- * Shows all products with stock info. Search, filter by category and status.
+ * Shows all products with stock info. Filter by category and status.
+ * Each row has View, Edit (update stock), Delete actions.
  */
 $t = "Stock Management"; $a = "stock";
 require_once "../includes/header.php";
 include  "../includes/flash.php";
 
-$q      = trim($_GET["q"]      ?? "");
-$cat    = $_GET["cat"]         ?? "";
-$status = $_GET["status"]      ?? "";
+$cat    = $_GET["cat"]    ?? "";
+$status = $_GET["status"] ?? "";
 
 $where = ["is_active=1"];
-if($q)      $where[] = "(name LIKE '%".mysqli_real_escape_string($conn,$q)."%' OR sku LIKE '%".mysqli_real_escape_string($conn,$q)."%')";
-if($cat)    $where[] = "category='".mysqli_real_escape_string($conn,$cat)."'";
+if($cat) $where[] = "category='".mysqli_real_escape_string($conn,$cat)."'";
 if($status === "in")  $where[] = "quantity > min_qty";
 if($status === "low") $where[] = "quantity > 0 AND quantity <= min_qty";
 if($status === "out") $where[] = "quantity = 0";
 
-$products = mysqli_query($conn,
-    "SELECT id, name, sku, category, quantity, min_qty,
-            CASE
-              WHEN quantity = 0        THEN 'Out of Stock'
-              WHEN quantity <= min_qty THEN 'Low Stock'
-              ELSE                          'In Stock'
-            END AS stock_status
-     FROM products WHERE ".implode(" AND ",$where)." ORDER BY name");
+$sql = "SELECT id, name, sku, category, quantity, min_qty,
+        CASE
+          WHEN quantity = 0        THEN 'Out of Stock'
+          WHEN quantity <= min_qty THEN 'Low Stock'
+          ELSE                          'In Stock'
+        END AS stock_status
+        FROM products WHERE ".implode(" AND ",$where)." ORDER BY name";
 
-$total = mysqli_num_rows($products);
+$products = mysqli_query($conn, $sql);
+$total    = mysqli_num_rows($products);
 ?>
 <div class="page-hdr">
   <h1>Stock Management</h1>
@@ -35,7 +34,6 @@ $total = mysqli_num_rows($products);
 </div>
 <div class="card">
   <form method="GET" class="filter-bar">
-    <input type="text" name="q" class="fc" placeholder="Search name or SKU..." value="<?= h($q) ?>" style="width:200px">
     <select name="cat" class="fc">
       <option value="">All categories</option>
       <?php foreach(["iPhone","Mac","iPad","Watch","Accessory"] as $c): ?>
@@ -49,7 +47,7 @@ $total = mysqli_num_rows($products);
       <option value="out" <?= $status==="out"?"selected":"" ?>>Out of Stock</option>
     </select>
     <button class="btn btn-outline btn-sm">Filter</button>
-    <?php if($q||$cat||$status): ?>
+    <?php if($cat||$status): ?>
     <a href="index.php" class="btn btn-outline btn-sm">Clear</a>
     <?php endif; ?>
     <span style="margin-left:auto;font-size:12px;color:var(--t2)"><?= $total ?> product<?= $total!==1?"s":"" ?></span>
@@ -81,7 +79,7 @@ $total = mysqli_num_rows($products);
       <td>
         <div style="display:flex;gap:5px">
           <a href="view.php?id=<?= $p["id"] ?>"  class="icon-btn" title="View">&#128065;</a>
-          <a href="edit.php?id=<?= $p["id"] ?>"  class="icon-btn" title="Edit">&#9998;</a>
+          <a href="edit.php?id=<?= $p["id"] ?>"  class="icon-btn" title="Edit stock level">&#9998;</a>
           <?php if(isOwner()): ?>
           <a href="delete.php?id=<?= $p["id"] ?>" class="icon-btn del" title="Delete"
              onclick="return confirm('Delete all stock records for <?= h(addslashes($p["name"])) ?>?')">&#128465;</a>
