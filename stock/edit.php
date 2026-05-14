@@ -19,7 +19,8 @@ if($_SERVER["REQUEST_METHOD"]==="POST"){
     $min = (int)$_POST["min_qty"];
     if($min < 1){ $err = "Minimum stock level must be at least 1."; }
     else {
-        mysqli_query($conn,"UPDATE products SET min_qty=$min WHERE id=$id");
+        // Fixed: now uses Stock class method instead of raw SQL (three-layer architecture)
+        Stock::updateMinQty($conn, $id, $min);
         flash("success","Stock settings updated.");
         header("Location: view.php?id=$id"); exit;
     }

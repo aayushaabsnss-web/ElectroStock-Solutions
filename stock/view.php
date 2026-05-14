@@ -1,13 +1,13 @@
 <?php
 /**
  * stock/view.php — Stock Detail (Presentation Layer)
- * Fetches a Product object and StockMovement objects.
+ * Fetches a Product object and Stock objects.
  * HTML accesses data via getter methods.
  */
 $t = "Stock Detail"; $a = "stock";
 require_once "../includes/header.php";
 require_once "../classes/Product.php";
-require_once "../classes/StockMovement.php";
+require_once "../classes/Stock.php"; // Fixed: was StockMovement.php
 include  "../includes/flash.php";
 
 $id = (int)($_GET["id"] ?? 0);
@@ -15,8 +15,8 @@ $id = (int)($_GET["id"] ?? 0);
 $product = Product::getById($conn, $id);
 if(!$product){ flash("error","Product not found."); header("Location: index.php"); exit; }
 
-// Fetch StockMovement objects for this product
-$transactions = StockMovement::getByProduct($conn, $id, 20);
+// Fetch Stock objects for this product
+$transactions = Stock::getByProduct($conn, $id, 20); // Fixed: was StockMovement::getByProduct
 ?>
 <div class="page-hdr">
   <a href="index.php" class="btn btn-outline btn-sm">&larr; Back</a>
@@ -64,7 +64,7 @@ $transactions = StockMovement::getByProduct($conn, $id, 20);
     <?php if(empty($transactions)): ?>
     <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t3)">No transactions yet.</td></tr>
     <?php else: ?>
-    <?php foreach($transactions as $tx): // Each $tx is a StockMovement object ?>
+    <?php foreach($transactions as $tx): // Each $tx is a Stock object ?>
     <tr>
       <td><span class="badge <?= $tx->getTypeBadge() ?>"><?= $tx->getType() ?></span></td>
       <td class="mono fw"><?= $tx->getSignedQuantity() ?></td>

@@ -5,6 +5,7 @@
  */
 $t = "Edit Transaction"; $a = "stock";
 require_once "../includes/header.php";
+require_once "../classes/Stock.php"; // Middle layer — Stock class
 requireOwner();
 
 $id  = (int)($_GET["id"]  ?? 0);
@@ -16,9 +17,8 @@ if(!$tx){ flash("error","Transaction not found."); header("Location: index.php")
 
 if($_SERVER["REQUEST_METHOD"]==="POST"){
     $notes = trim($_POST["notes"] ?? "");
-    $stmt  = mysqli_prepare($conn,"UPDATE stock_movements SET notes=? WHERE id=?");
-    mysqli_stmt_bind_param($stmt,"si",$notes,$id);
-    mysqli_stmt_execute($stmt);
+    // Uses Stock class method — three-layer architecture
+    Stock::updateNotes($conn, $id, $notes);
     flash("success","Transaction notes updated.");
     header("Location: view.php?id=$pid"); exit;
 }

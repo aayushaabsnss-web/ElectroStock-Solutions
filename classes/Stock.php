@@ -1,10 +1,10 @@
 <?php
 /**
- * StockMovement Class — Middle Layer (OOP)
+ * Stock Class — Middle Layer (OOP)
  * Represents a single stock transaction with private properties and public getters.
- * Static methods fetch from DB and return StockMovement objects.
+ * Static methods fetch from DB and return Stock objects.
  */
-class StockMovement {
+class Stock {
 
     // ── Private properties ───────────────────────────────────
     private int    $id;
@@ -18,7 +18,7 @@ class StockMovement {
     private string $created_at;
 
     /**
-     * Constructor — maps a DB row into a StockMovement object.
+     * Constructor — maps a DB row into a Stock object.
      */
     public function __construct(array $row) {
         $this->id            = (int)($row['id']           ?? 0);
@@ -84,7 +84,7 @@ class StockMovement {
     }
 
     // ── Static factory methods ───────────────────────────────
-    /** Returns recent transactions as StockMovement objects */
+    /** Returns recent transactions as Stock objects */
     public static function getRecent(mysqli $conn, int $limit=20): array {
         return self::fromDB($conn,
             "SELECT sm.*, p.name product_name, p.sku, u.full_name moved_by_name
@@ -94,7 +94,7 @@ class StockMovement {
              ORDER BY sm.created_at DESC LIMIT $limit");
     }
 
-    /** Returns filtered history as StockMovement objects */
+    /** Returns filtered history as Stock objects */
     public static function getHistory(mysqli $conn, ?int $pid, ?string $type, ?string $from, ?string $to): array {
         $stmt = mysqli_prepare($conn, "CALL sp_getStockHistory(?,?,?,?)");
         mysqli_stmt_bind_param($stmt, 'isss', $pid, $type, $from, $to);
@@ -129,6 +129,13 @@ class StockMovement {
         $r   = mysqli_query($conn, "SELECT @new_qty AS new_qty, @error AS error");
         $row = mysqli_fetch_assoc($r);
         return [$row['error'] === null, $row['error'], (int)$row['new_qty']];
+    }
+
+    /** Updates the minimum stock level for a product */
+    public static function updateMinQty(mysqli $conn, int $productId, int $minQty): bool {
+        $stmt = mysqli_prepare($conn, "UPDATE products SET min_qty=? WHERE id=?");
+        mysqli_stmt_bind_param($stmt, "ii", $minQty, $productId);
+        return mysqli_stmt_execute($stmt);
     }
 
     /** Updates the notes on a transaction */
