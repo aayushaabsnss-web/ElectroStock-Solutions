@@ -5,15 +5,15 @@
  */
 $t = "Record Stock"; $a = "stock";
 require_once "../includes/header.php";
-require_once "../classes/Stock.php"; // Fixed: was StockMovement.php
+require_once "../classes/Stock.php"; 
 include  "../includes/flash.php";
 
 $preselect = (int)($_GET["pid"] ?? 0);
 
 if($_SERVER["REQUEST_METHOD"]==="POST"){
-    $errors = Stock::validate($_POST, isOwner()); // Fixed: was StockMovement::validate
+    $errors = Stock::validate($_POST, isOwner()); 
     if(!$errors){
-        [$ok, $err, $newQty] = Stock::add($conn, // Fixed: was StockMovement::add
+        [$ok, $err, $newQty] = Stock::add($conn, 
             (int)$_POST["product_id"], $_POST["type"],
             (int)$_POST["quantity"], $_SESSION["uid"],
             trim($_POST["notes"] ?? ""));
@@ -22,7 +22,7 @@ if($_SERVER["REQUEST_METHOD"]==="POST"){
     } else { flash("error", implode(" ", $errors)); }
 }
 
-$productList = Stock::getProductList($conn); // Fixed: was StockMovement::getProductList
+$productList = Stock::getProductList($conn);
 ?>
 <div class="page-hdr">
   <a href="index.php" class="btn btn-outline btn-sm">&larr; Back to stock</a>

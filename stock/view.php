@@ -7,7 +7,7 @@
 $t = "Stock Detail"; $a = "stock";
 require_once "../includes/header.php";
 require_once "../classes/Product.php";
-require_once "../classes/Stock.php"; // Fixed: was StockMovement.php
+require_once "../classes/Stock.php";
 include  "../includes/flash.php";
 
 $id = (int)($_GET["id"] ?? 0);
@@ -16,7 +16,7 @@ $product = Product::getById($conn, $id);
 if(!$product){ flash("error","Product not found."); header("Location: index.php"); exit; }
 
 // Fetch Stock objects for this product
-$transactions = Stock::getByProduct($conn, $id, 20); // Fixed: was StockMovement::getByProduct
+$transactions = Stock::getByProduct($conn, $id, 20); 
 ?>
 <div class="page-hdr">
   <a href="index.php" class="btn btn-outline btn-sm">&larr; Back</a>

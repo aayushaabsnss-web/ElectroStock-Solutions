@@ -174,4 +174,11 @@ class Stock {
         if (empty($d['quantity']) || (int)$d['quantity'] <= 0) $e[] = 'Quantity must be greater than 0.';
         return $e;
     }
+    
+    //** Deletes all stock movements for a product and resets quantity to 0 *//
+        public static function deleteAllByProduct(mysqli $conn, int $productId): bool {
+         mysqli_query($conn, "DELETE FROM stock_movements WHERE product_id=$productId");
+         mysqli_query($conn, "UPDATE products SET quantity=0 WHERE id=$productId");
+         return true;
+        }
 }
