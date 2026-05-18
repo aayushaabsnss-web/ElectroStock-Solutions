@@ -7,9 +7,7 @@
  */
 $t = "Stock History"; $a = "stock";
 require_once "../includes/header.php";
-require_once "../classes/Stock.php";
-
-$stockObj = new Stock($conn); // Middle layer
+require_once "../classes/Stock.php"; // Middle layer — Stock class
 
 // Read filter parameters
 $pid   = $_GET["pid"]   ?? null;
@@ -17,12 +15,12 @@ $type  = $_GET["type"]  ?? null;
 $from  = $_GET["from"]  ?? null;
 $to    = $_GET["to"]    ?? null;
 
-// Fetch history via Stock class (calls sp_getStockHistory)
-$res = $stockObj->getHistory($pid ?: null, $type ?: null, $from ?: null, $to ?: null);
-$n   = mysqli_num_rows($res);
+// Fetch history via Stock static method (calls sp_getStockHistory stored procedure)
+$movements = Stock::getHistory($conn, $pid ? (int)$pid : null, $type ?: null, $from ?: null, $to ?: null);
+$n         = count($movements);
 
-// Get product list for the filter dropdown
-$prods = $stockObj->getProductList();
+// Get product list array for the filter dropdown
+$prods = Stock::getProductList($conn);
 ?>
 <div class="page-hdr"><h1>Stock History</h1></div>
 <div class="card" style="margin-bottom:16px">
@@ -30,7 +28,9 @@ $prods = $stockObj->getProductList();
   <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="fg" style="margin:0"><label>Product</label>
       <select name="pid" class="fc" style="width:200px"><option value="">All products</option>
-        <?php while($p=mysqli_fetch_assoc($prods)): ?><option value="<?= $p["id"] ?>" <?= $pid==$p["id"]?"selected":"" ?>><?= h($p["name"]) ?></option><?php endwhile; ?>
+        <?php foreach($prods as $p): // Fixed: was mysqli_fetch_assoc loop — getProductList() returns an array ?>
+        <option value="<?= $p["id"] ?>" <?= $pid==$p["id"]?"selected":"" ?>><?= h($p["name"]) ?></option>
+        <?php endforeach; ?>
       </select></div>
     <div class="fg" style="margin:0"><label>Type</label>
       <select name="type" class="fc" style="width:140px"><option value="">All types</option>
@@ -50,17 +50,29 @@ $prods = $stockObj->getProductList();
   <table class="tbl">
     <thead><tr><th>Product</th><th>Type</th><th>Qty change</th><th>Date</th><th>By</th><th>Notes</th><th>Actions</th></tr></thead>
     <tbody>
-    <?php $e=true; while($tx=mysqli_fetch_assoc($res)): $e=false;
-      $tc=["IN"=>"b-green","OUT"=>"b-red","ADJUSTMENT"=>"b-amber"];
-      $sign=$tx["quantity"]>0?"+":"";
-    ?>
-    <tr><td class="fw"><?= h($tx["product_name"]) ?></td>
-    <td><span class="badge <?= $tc[$tx["type"]] ?>"><?= $tx["type"] ?></span></td>
-    <td class="mono"><?= $sign.$tx["quantity"] ?></td>
-    <td class="muted"><?= date("d M Y H:i",strtotime($tx["created_at"])) ?></td>
-    <td><?= h($tx["moved_by_name"]) ?></td>
-    <td class="muted"><?= h($tx["notes"]??"—") ?></td><td><div style="display:flex;gap:5px"><a href="view.php?id=<?= $tx['id'] ?>" class="icon-btn" title="View">&#128065;</a><?php if(isOwner()): ?><a href="edit.php?id=<?= $tx['id'] ?>" class="icon-btn" title="Edit">&#9998;</a><a href="delete.php?id=<?= $tx['id'] ?>" class="icon-btn del" onclick="return confirm('Delete this transaction and reverse stock?')" title="Delete">&#128465;</a><?php endif; ?></div></td></tr>
-    <?php endwhile; if($e): ?><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t3)">No transactions found.</td></tr><?php endif; ?>
+    <?php if(empty($movements)): ?>
+    <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t3)">No transactions found.</td></tr>
+    <?php else: ?>
+    <?php foreach($movements as $tx): // Each $tx is a Stock object — use getters ?>
+    <tr>
+      <td class="fw"><?= h($tx->getProductName()) ?></td>
+      <td><span class="badge <?= $tx->getTypeBadge() ?>"><?= $tx->getType() ?></span></td>
+      <td class="mono"><?= $tx->getSignedQuantity() ?></td>
+      <td class="muted"><?= $tx->getFormattedDate() ?></td>
+      <td><?= h($tx->getMovedBy()) ?></td>
+      <td class="muted"><?= h($tx->getNotes() ?: "—") ?></td>
+      <td><div style="display:flex;gap:5px">
+        <!-- Fixed: view now links to product page using getProductId(), not transaction id -->
+        <a href="view.php?id=<?= $tx->getProductId() ?>" class="icon-btn" title="View">&#128065;</a>
+        <?php if(isOwner()): ?>
+        <!-- Fixed: edit/delete now correctly link to edit_tx.php and delete_tx.php with both ids -->
+        <a href="edit_tx.php?id=<?= $tx->getId() ?>&pid=<?= $tx->getProductId() ?>" class="icon-btn" title="Edit">&#9998;</a>
+        <a href="delete_tx.php?id=<?= $tx->getId() ?>&pid=<?= $tx->getProductId() ?>" class="icon-btn del" onclick="return confirm('Delete this transaction and reverse stock?')" title="Delete">&#128465;</a>
+        <?php endif; ?>
+      </div></td>
+    </tr>
+    <?php endforeach; ?>
+    <?php endif; ?>
     </tbody>
   </table>
 </div>

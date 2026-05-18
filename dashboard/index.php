@@ -27,8 +27,7 @@ $orders = mysqli_query($conn,
      ORDER BY o.created_at DESC LIMIT 5");
 
 // Alerts
-$alertObj = new Alert($conn);
-$alerts   = $alertObj->getActive();
+$alerts   = Alert::getActive($conn);
 
 // Recent products
 $products = mysqli_query($conn,

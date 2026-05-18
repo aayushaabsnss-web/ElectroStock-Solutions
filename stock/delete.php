@@ -6,12 +6,12 @@
  */
 require_once "../config/db.php";
 require_once "../auth/session.php";
+require_once "../classes/Stock.php";
 requireOwner();
 
 $id = (int)($_GET["id"] ?? 0);
 if($id){
-    mysqli_query($conn,"DELETE FROM stock_movements WHERE product_id=$id");
-    mysqli_query($conn,"UPDATE products SET quantity=0 WHERE id=$id");
+    Stock::deleteAllByProduct($conn, $id);
     flash("success","All stock records cleared. Quantity reset to 0.");
 }
 header("Location: index.php"); exit;
